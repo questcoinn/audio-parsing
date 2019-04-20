@@ -1,6 +1,8 @@
 import requests as req
 from bs4 import BeautifulSoup
-import datetime
+
+from node import *
+import source
 
 def printFirstPage(src):
   table = []
@@ -59,10 +61,15 @@ def fetchedPage(src, home, page, customHeaders):
 
         artist  = html.find("strong", { "class": "artist" }).text
         title   = html.find("span", { "class": "title" }).text
-        audio   = html.find("div", { "class": "player-init" })["data-file"]
+        try:
+          audio = html.find("div", { "class": "player-init" })["data-file"]
+          isRight = True
+        except:
+          audio = html.find("a", { "class": "download" })["href"]
+          isRight = False
         artwork = html.find("img")["src"]
         
-        datas.append({ "artist": artist, "title": title, "audio": audio, "artwork": artwork })
+        datas.append({ "artist": artist, "title": title, "audio": audio, "artwork": artwork, "isRight": isRight })
         print("..[ {} - {} ] done..".format(artist, title))
 
     if linkDate < date:
@@ -80,65 +87,49 @@ def fetchedPage(src, home, page, customHeaders):
 
 def fileWrite(datas, date):
   datas.reverse()
+  
+  html = ElementNode("html")
+  head = html.createChild("head")
+  meta = head.createChild("meta")
+  meta.createAttr("charset", "utf-8")
+  style = head.createChild("style")
+  style.writeText(source.styleVal)
+  body = html.createChild("body")
 
-  style = '''@import url('https://fonts.googleapis.com/css?family=Dosis');
-body {
-  font-family: 'Dosis', sans-serif;
-  background-color: #bbb;
-  margin: 0;
-}
-header {
-  background-color: #fff;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0px 4px 20px;
-  z-index: 999;
-  position: fixed;
-  top: 0;
-}
-header p {
-  margin: 0;
-  font-size: 5rem;
-}
-.line {
-  position: fixed;
-  top: 97px;
-  border: 2px solid red;
-  z-index: 1000;
-}
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-  margin: 0 auto;
-  width: 80%;
-  padding-top: 130px;
-}
-img { width: 200px }
-.item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0px 0px 20px;
-  border-radius: 5px;
-}
-.title {
-  margin: 5px 0;
-  background-color: aliceblue;
-}'''
+  header = body.createChild("header")
+  headerP = header.createChild("p")
+  headerP.writeText(str(date))
+  line = body.createChild("div")
+  line.createAttr("class", "line")
 
-  script = '''window.onscroll = () => {
-  bodyHeight = document.body.offsetHeight;
-  innerHeight = window.innerHeight;
-  scroll = document.body.scrollTop;
+  container = body.createChild("div")
+  container.createAttr("class", "container")
 
-  size = bodyHeight === innerHeight ? 100 : scroll / (bodyHeight - innerHeight) * 100;
-  document.querySelector(".line").style.width = `${size}%`
-}'''
+  for data in datas:
+    item = container.createChild("div")
+    item.createAttr("class", "item")
+    item.createAttr("id", data["title"])
+
+    artwork = item.createChild("img")
+    artwork.createAttr("src", data["artwork"])
+    title = item.createChild("div")
+    title.createAttr("class", "title")
+    title.writeText("{} - {}".format(data["artist"], data["title"]))
+    if data["isRight"]:
+      audio = item.createChild("audio")
+      audio.createAttr("src", data["audio"])
+      audio.createAttr("controls", None)
+      if not download:
+        audio.createAttr("controlsList", "nodownload")
+    else:
+      a = item.createChild("a")
+      if download:
+        a.createAttr("href", data["audio"])
+        a.createAttr("target", "_blank")
+      a.writeText("###")
+
+  script = body.createChild("script")
+  script.writeText(source.scriptVal)
   
   if download:
     fileName = str(date)
@@ -146,37 +137,8 @@ img { width: 200px }
     fileName = str(date) + "_server"
 
   with open("{}.html".format(fileName), "w", encoding="utf8") as file:
-    file.write("<head>")
-    file.write("<style>{}</style>".format(style))
-    file.write("</head>")
-    
-    file.write("<body>")
-    
-    file.write("<header><p>{}</p></header>".format(date))
-    file.write("<div class=\"line\"></div>")
-    file.write("<div class=\"container\">")
-    
-    for data in datas:
-      file.write("<div class=\"item\">")
-      
-      artwork = "<img src=\"{}\">".format(data["artwork"])
-      title   = "<div class=\"title\">{} - {}</div>".format(data["artist"], data["title"])
-      if download:
-        audio = "<audio controls src=\"{}\"></audio>".format(data["audio"])
-      else:
-        audio = "<audio controls controlsList=\"nodownload\" src=\"{}\"></audio>".format(data["audio"])
-
-      file.write(artwork)
-      file.write(title)
-      file.write(audio)
-      
-      file.write("</div>")
-      
-    file.write("</div>")
-
-    file.write("<script>{}</script>".format(script))
-      
-    file.write("</body>")
+    file.write("<!DOCTYPE html>\n")
+    file.write(html.html())
 
   print(">> made web file!")
   print(">> check the {}.html file!\n".format(fileName))
@@ -216,9 +178,9 @@ while True:
                   date = int(date)
                   break
                 else:
-                  print(">> WRONG INPUT\n")
-              except:
-                print(">> WRONG INPUT\n")
+                  print(">> WRONG INPUT(1)\n")
+              except Exception as e:
+                print(">> WRONG INPUT(2)\n{}\n".format(e))
             # download
             while True:
               download = input("download(0: false, 1: true): ")
@@ -227,9 +189,9 @@ while True:
                   download = int(download)
                   break
                 else:
-                  print(">> WRONG INPUT\n")
-              except:
-                print(">> WRONG INPUT\n")
+                  print(">> WRONG INPUT(3)\n")
+              except Exception as e:
+                print(">> WRONG INPUT(4)\n{}\n".format(e))
             print()
 
             datas = fetchedPage(src, home, page, customHeaders)
@@ -237,13 +199,13 @@ while True:
             fileWrite(datas, date)
             break
           else:
-            print(">> WRONG INPUT\n")
+            print(">> WRONG INPUT(5)\n")
             
-        except:
-          print(">> WRONG INPUT\n")
+        except Exception as e:
+          print(">> WRONG INPUT(6)\n{}\n".format(e))
           continue
 
-  except:
-    print(">> WRONG INPUT\n")
+  except Exception as e:
+    print(">> WRONG INPUT(7)\n{}\n".format(e))
     continue
     
