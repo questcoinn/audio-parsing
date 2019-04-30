@@ -1,8 +1,8 @@
 import requests as req
 from bs4 import BeautifulSoup
+import json
 
 from node import *
-import source
 
 def printFirstPage(src):
   table = []
@@ -92,8 +92,18 @@ def fileWrite(datas, date):
   head = html.createChild("head")
   meta = head.createChild("meta")
   meta.createAttr("charset", "utf-8")
-  style = head.createChild("style")
-  style.writeText(source.styleVal)
+  
+  style = head.createChild("link")
+  style.createAttr("rel", "stylesheet")
+  style.createAttr("type", "text/css")
+  style.createAttr("href", "style.css")
+
+  with open("keyframes.json", "r") as file:
+    keyframesObj = json.loads(file.read())
+
+  keyframes = head.createChild("style")
+  keyframes.writeText(keyframesObj["rotate"] + '\n' + keyframesObj["turn-back"])
+  
   body = html.createChild("body")
 
   header = body.createChild("header")
@@ -116,11 +126,13 @@ def fileWrite(datas, date):
     title.createAttr("class", "title")
     title.writeText("{} - {}".format(data["artist"], data["title"]))
     if data["isRight"]:
-      audio = item.createChild("audio")
-      audio.createAttr("src", data["audio"])
-      audio.createAttr("controls", None)
+      loadBtn = item.createChild("input")
+      loadBtn.createAttr("type", "button")
+      loadBtn.createAttr("value", "Load")
+      loadBtn.createAttr("class", "load")
+      loadBtn.createAttr("src", data["audio"])
       if not download:
-        audio.createAttr("controlsList", "nodownload")
+        loadBtn.createAttr("download", "0")
     else:
       a = item.createChild("a")
       if download:
@@ -129,7 +141,7 @@ def fileWrite(datas, date):
       a.writeText("###")
 
   script = body.createChild("script")
-  script.writeText(source.scriptVal)
+  script.createAttr("src", "script.js")
   
   if download:
     fileName = str(date)
