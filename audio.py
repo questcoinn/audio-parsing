@@ -41,6 +41,7 @@ def fetchedPage(src, home, page, customHeaders):
     print(">> fetching files..")
     while True:
       src = src.find_next("a")
+      
       if (("rel" in src) and (src["rel"] == "prev")) or (src["href"][33] == '?'):
         break
       

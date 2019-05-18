@@ -1,0 +1,62 @@
+<head>
+  <style>
+    * { box-sizing: border-box }
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #container {
+      display: flex;
+      flex-direction: column;
+      margin: 0 auto;
+      min-height: 100vh;
+      width: 80%;
+      padding-top: 50px;
+    }
+    a {
+      text-align: center;
+      text-decoration: none;
+      margin: 5px 0;
+    }
+    #today { box-shadow: inset 0px 0px 5px 1px }
+  </style>
+</head>
+<body>
+  <div id="time"></div>
+  <div id="container"></div>
+
+  <script>
+    const timeDiv   = document.querySelector("#time");
+    const container = document.querySelector("#container");
+
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const DAY = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const today = new Date();
+    const time = today.getTime();
+
+    const korTime = today.toLocaleString("ko-KR");
+    const utcTime = today.toLocaleString("ko-KR", { timeZone: "UTC" });
+
+    timeDiv.innerHTML = `KR - ${korTime} .................... UTC - ${utcTime}`;
+
+    const parseDate = d => [
+      d.getUTCFullYear(),
+      d.getUTCMonth() + 1,
+      d.getUTCDate(),
+      d.getUTCDay()
+    ];
+
+    for(let i = -6; i < 1; i++) {
+      const _ = parseDate(new Date(time + i * ONE_DAY));
+
+      const node = document.createElement("a");
+      node.innerHTML = `${_[0]}-${_[1]}-${_[2]} ${DAY[_[3]]}`;
+
+      node.setAttribute("href", `${_[0]}${_[1].toString().padStart(2, 0)}${_[2].toString().padStart(2, 0)}.html`);
+      node.setAttribute("target", "_blank");
+      if(i === 0) node.setAttribute("id", "today");
+
+      container.appendChild(node);
+    }
+  </script>
+</body>
