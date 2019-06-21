@@ -35,7 +35,7 @@ class ElementNode(Node):
 		if self.isSingleton:
 			return
 		else:
-			self.text = txt;
+			self.text = txt
 			child = TextNode(txt)
 			child.parent = self
 			child.depth = self.depth + 1

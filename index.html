@@ -52,7 +52,7 @@
       const node = document.createElement("a");
       node.innerHTML = `${_[0]}-${_[1]}-${_[2]} ${DAY[_[3]]}`;
 
-      node.setAttribute("href", `${_[0]}${_[1].toString().padStart(2, 0)}${_[2].toString().padStart(2, 0)}.html`);
+      node.setAttribute("href", `./pages/${_[0]}${_[1].toString().padStart(2, 0)}${_[2].toString().padStart(2, 0)}.html`);
       node.setAttribute("target", "_blank");
       if(i === 0) node.setAttribute("id", "today");
 

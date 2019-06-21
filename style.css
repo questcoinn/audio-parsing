@@ -33,7 +33,7 @@ header p {
   align-items: center;
   background-color: #fff;
   margin: 6.5rem auto 0 auto;
-  width: 80%;
+  width: 60%;
   padding-top: 1.5rem;
   min-height: calc(100vh - 8rem);
 }
@@ -53,6 +53,9 @@ img {
 .title {
   margin: 5px 0;
   background-color: aliceblue;
+  word-wrap: break-word;
+  max-width: 300px;
+  text-align: center;
 }
 .load {
   border: 2px solid red;

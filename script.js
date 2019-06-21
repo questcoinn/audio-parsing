@@ -1,23 +1,29 @@
 (() => {
+  /***************
+   * Scroll-Line *
+   ***************/
   const lineChange = () => {
     const offHeight = document.documentElement.offsetHeight;
     const clientHeight = document.documentElement.clientHeight;
     const scroll = document.documentElement.scrollTop;
 
     const size = offHeight <= clientHeight ? 100 : scroll / (offHeight - clientHeight) * 100;
-    document.querySelector(".line").style.width = `${size}%`
+    document.querySelector(".line").style.width = `${size}%`;
   }
 
   window.onscroll = lineChange;
   window.onload = lineChange;
 
-  const getDeg = target => {
+  /******************
+   * Image Rotation *
+   ******************/
+  const getDeg = (target) => {
     const time = target.currentTime;
     const sec = Math.floor(time);
     return ((sec % 8) + (time - sec)) / 8 * 360;
   }
 
-  const rotate = e => {
+  const rotate = (e) => {
     const deg = getDeg(e.target);
     
     const style = e.target.parentNode.firstElementChild.style;
@@ -33,7 +39,7 @@
     style.animationTimingFunction = "linear";
   }
 
-  const goto = e => {
+  const goto = (e) => {
     const deg = getDeg(e.target);
     
     const style = e.target.parentNode.firstElementChild.style;
@@ -49,7 +55,7 @@
     document.styleSheets[1].rules.item(0).cssRules[1].style.transform = `rotate(${deg + 360}deg)`;
   }
 
-  const turnBack = e => {
+  const turnBack = (e) => {
     const deg = getDeg(e.target);
     
     const img   = e.target.parentNode.firstElementChild;
@@ -70,10 +76,39 @@
     });
   }
 
-  for(let node of document.querySelectorAll(".load")) {
-    node.addEventListener("click", e => {
-      const btn = e.target;
+  /************
+   * Playlist *
+   ************/
+  const playlist = [];
 
+  const changeTitle = () => {
+    const title = playlist.reduce((acc, cur) => `${acc}, ${cur}`, "").slice(2);
+
+    document.querySelector("title").innerHTML = title || document.querySelector("header p").innerHTML;
+  }
+  
+  const listAdd = (e) => {
+    const title = e.target.previousElementSibling.innerHTML;
+    playlist.push(title);
+    changeTitle();
+  }
+  
+  const listRemove = (e) => {
+    const title = e.target.previousElementSibling.innerHTML;
+    const index = playlist.findIndex((el) => el === title);
+    if(index > -1) {
+      playlist.splice(index, 1);
+    }
+    changeTitle();
+  }
+
+  /*******************
+   * Event Listeners *
+   *******************/
+  for(let node of document.querySelectorAll(".load")) {
+    node.addEventListener("click", (e) => {
+      const btn = e.target;
+      
       const audioNode = document.createElement("audio");
       audioNode.setAttribute("src", btn.src);
       audioNode.setAttribute("controls", "controls");
@@ -83,11 +118,15 @@
       
       btn.parentNode.replaceChild(audioNode, e.target);
 
-      audioNode.addEventListener('contextmenu', e => e.preventDefault());
-      audioNode.addEventListener('canplay', e => {
-        e.target.addEventListener('play', rotate);
-        e.target.addEventListener('pause', goto);
-        e.target.addEventListener('ended', turnBack);
+      audioNode.addEventListener("contextmenu", (e) => e.preventDefault());
+      audioNode.addEventListener("canplay", (e) => {
+        e.target.addEventListener("play", rotate);
+        e.target.addEventListener("pause", goto);
+        e.target.addEventListener("ended", turnBack);
+
+        e.target.addEventListener("play", listAdd);
+        e.target.addEventListener("pause", listRemove);
+        e.target.addEventListener("ended", listRemove);
       });
     });
   }

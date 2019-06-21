@@ -42,7 +42,7 @@ def fetchedPage(src, home, page, customHeaders):
     while True:
       src = src.find_next("a")
       
-      if (("rel" in src) and (src["rel"] == "prev")) or (src["href"][33] == '?'):
+      if (src.has_attr("rel") and (src["rel"] == ["prev"])) or (src["href"][33] == '?'):
         break
       
       linkDate = ''.join(src.find("time")["datetime"].replace('T', '-').split('-')[:3])
@@ -93,11 +93,13 @@ def fileWrite(datas, date):
   head = html.createChild("head")
   meta = head.createChild("meta")
   meta.createAttr("charset", "utf-8")
+  title = html.createChild("title")
+  title.writeText(str(date))
   
   style = head.createChild("link")
   style.createAttr("rel", "stylesheet")
   style.createAttr("type", "text/css")
-  style.createAttr("href", "style.css")
+  style.createAttr("href", "../style.css")
 
   with open("keyframes.json", "r") as file:
     keyframesObj = json.loads(file.read())
@@ -119,7 +121,7 @@ def fileWrite(datas, date):
   for data in datas:
     item = container.createChild("div")
     item.createAttr("class", "item")
-    item.createAttr("id", data["title"])
+    item.createAttr("id", data["title"].replace(" ", ""))
 
     artwork = item.createChild("img")
     artwork.createAttr("src", data["artwork"])
@@ -139,17 +141,17 @@ def fileWrite(datas, date):
       if download:
         a.createAttr("href", data["audio"])
         a.createAttr("target", "_blank")
-      a.writeText("###")
+      a.writeText("Something weird happened...")
 
   script = body.createChild("script")
-  script.createAttr("src", "script.js")
+  script.createAttr("src", "../script.js")
   
   if download:
     fileName = str(date)
   else:
     fileName = str(date) + "_server"
 
-  with open("{}.html".format(fileName), "w", encoding="utf8") as file:
+  with open("./pages/{}.html".format(fileName), "w", encoding="utf8") as file:
     file.write("<!DOCTYPE html>\n")
     file.write(html.html())
 
