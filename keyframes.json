@@ -1,4 +1,0 @@
-{
-  "rotate"    : "@keyframes rotate {\n  0% { transform: rotate(0deg) }\n  100% { transform: rotate(360deg) }\n}",
-  "turn-back" : "@keyframes turn-back {\n  100% { transform: rotate(0deg) }\n}"
-}
