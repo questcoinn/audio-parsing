@@ -198,12 +198,12 @@ def spread(opt):
     print(line)
 
 def get(opt):
-  today = int(str(datetime.utcnow().date()).replace('-', ''))
+  _today = int(str(datetime.utcnow().date()).replace('-', ''))
 
   if opt['d'] == "today":
-    date = today
+    date = _today
   elif opt['d'] == "yesterday":
-    date = today - 1
+    date = _today - 1
   else:
     date = int(opt['d'])
 
