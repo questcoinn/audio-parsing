@@ -2,7 +2,7 @@ import requests as req
 from bs4 import BeautifulSoup
 import json
 
-from node import *
+from bin import node
 
 def printFirstPage(src):
   table = []
@@ -89,7 +89,7 @@ def fetchedPage(src, home, page, customHeaders):
 def fileWrite(datas, date):
   datas.reverse()
   
-  html = ElementNode("html")
+  html = node.ElementNode("html")
   head = html.createChild("head")
   meta = head.createChild("meta")
   meta.createAttr("charset", "utf-8")
@@ -99,9 +99,9 @@ def fileWrite(datas, date):
   style = head.createChild("link")
   style.createAttr("rel", "stylesheet")
   style.createAttr("type", "text/css")
-  style.createAttr("href", "../style.css")
+  style.createAttr("href", "../style/style.css")
 
-  with open("keyframes.json", "r") as file:
+  with open("style/keyframes.json", "r") as file:
     keyframesObj = json.loads(file.read())
 
   keyframes = head.createChild("style")
@@ -144,7 +144,7 @@ def fileWrite(datas, date):
       a.writeText("Something weird happened...")
 
   script = body.createChild("script")
-  script.createAttr("src", "../script.js")
+  script.createAttr("src", "../script/script.js")
   
   if download:
     fileName = str(date)
